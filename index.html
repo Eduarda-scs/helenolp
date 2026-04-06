@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Senna Tower — Acesso Reservado</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #080808;
+    --deep: #0e0e0e;
+    --surface: #141414;
+    --border: rgba(255,255,255,0.07);
+    --gold: #b8965a;
+    --gold-light: #d4ae78;
+    --gold-dim: rgba(184,150,90,0.15);
+    --white: #f5f2ed;
+    --white-dim: rgba(245,242,237,0.55);
+    --white-faint: rgba(245,242,237,0.2);
+    --serif: 'Cormorant Garamond', Georgia, serif;
+    --sans: 'Jost', 'Helvetica Neue', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; font-size: 16px; }
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: var(--sans);
+    font-weight: 300;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ── CURSOR ── */
+  .cursor {
+    position: fixed; width: 6px; height: 6px; background: var(--gold);
+    border-radius: 50%; pointer-events: none; z-index: 9999;
+    transition: transform 0.15s ease; mix-blend-mode: normal;
+    transform: translate(-50%, -50%);
+  }
+  .cursor-ring {
+    position: fixed; width: 32px; height: 32px;
+    border: 1px solid rgba(184,150,90,0.4); border-radius: 50%;
+    pointer-events: none; z-index: 9998;
+    transition: transform 0.4s cubic-bezier(0.16,1,0.3,1), width 0.3s, height 0.3s, opacity 0.3s;
+    transform: translate(-50%, -50%);
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 28px 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: linear-gradient(to bottom, rgba(8,8,8,0.95) 0%, transparent 100%);
+  }
+  .nav-logo {
+    font-family: var(--serif); font-size: 1.1rem; font-weight: 400;
+    letter-spacing: 0.25em; color: var(--white); text-transform: uppercase; opacity: 0.9;
+  }
+  .nav-logo span { color: var(--gold); }
+  .nav-cta {
+    font-family: var(--sans); font-size: 0.65rem; font-weight: 300;
+    letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold);
+    border: 1px solid rgba(184,150,90,0.4); padding: 10px 22px;
+    background: transparent; cursor: pointer;
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .nav-cta:hover { background: var(--gold-dim); border-color: var(--gold); }
+
+  /* ── HERO ── */
+  #hero {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #hero::after {
+    content: "";
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%; height: 45vh;
+    background: linear-gradient(to bottom, transparent, #080808);
+    z-index: 3; pointer-events: none;
+  }
+  .hero-video {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    z-index: 0; opacity: 0.45;
+    will-change: transform;
+  }
+  .hero-bg { position: absolute; inset: 0; z-index: 1; }
+  .hero-lines { position: absolute; inset: 0; overflow: hidden; opacity: 0.25; z-index: 2; }
+  .hero-lines::before, .hero-lines::after {
+    content: ''; position: absolute;
+    left: 50%; top: 0; bottom: 0;
+    border-left: 1px solid rgba(184,150,90,0.3);
+  }
+  .hero-lines::before { transform: translateX(calc(-50% - 260px)); }
+  .hero-lines::after  { transform: translateX(calc(-50% + 260px)); }
+  .hero-grain {
+    position: absolute; inset: 0; opacity: 0.035; z-index: 2;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+  }
+  .hero-content {
+    position: relative; z-index: 4;
+    text-align: center; padding: 0 24px; max-width: 780px; margin: 0 auto;
+    display: flex; flex-direction: column; align-items: center;
+    opacity: 0; animation: fadeUp 1.4s cubic-bezier(0.16,1,0.3,1) 0.3s forwards;
+    will-change: transform, opacity;
+  }
+  .hero-eyebrow {
+    font-family: var(--sans); font-size: 0.6rem; font-weight: 300;
+    letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold);
+    margin-bottom: 36px; opacity: 0.8;
+  }
+  .hero-eyebrow::before, .hero-eyebrow::after { content: '—'; margin: 0 12px; opacity: 0.5; }
+  .hero-h1 {
+    font-family: var(--serif); font-size: clamp(2.8rem, 5.5vw, 5rem);
+    font-weight: 300; line-height: 1.1; color: var(--white);
+    margin-bottom: 28px; letter-spacing: -0.01em;
+  }
+  .hero-h1 em { font-style: italic; color: var(--gold-light); }
+  .hero-sub {
+    font-family: var(--sans); font-size: clamp(0.8rem, 1.2vw, 0.92rem);
+    font-weight: 300; line-height: 1.9; color: var(--white-dim);
+    letter-spacing: 0.04em; max-width: 560px; margin: 0 auto 52px;
+  }
+  .hero-cta-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .btn-primary {
+    font-family: var(--sans); font-size: 0.65rem; font-weight: 300;
+    letter-spacing: 0.3em; text-transform: uppercase;
+    background: transparent; border: 1px solid rgba(184,150,90,0.6);
+    color: var(--gold-light); padding: 16px 44px; cursor: pointer;
+    transition: background 0.4s, border-color 0.4s, color 0.4s;
+    position: relative; overflow: hidden;
+  }
+  .btn-primary::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(184,150,90,0.12) 0%, transparent 100%);
+    opacity: 0; transition: opacity 0.4s;
+  }
+  .btn-primary:hover::before { opacity: 1; }
+  .btn-primary:hover { border-color: var(--gold); color: var(--white); }
+  .hero-micro { font-size: 0.6rem; letter-spacing: 0.2em; color: var(--white-faint); text-transform: uppercase; }
+  .hero-scroll {
+    position: absolute; bottom: 48px; left: 50%; transform: translateX(-50%);
+    z-index: 5; display: flex; flex-direction: column; align-items: center; gap: 10px;
+    opacity: 0; animation: fadeIn 1s ease 1.8s forwards;
+  }
+  .scroll-line {
+    width: 1px; height: 60px;
+    background: linear-gradient(to bottom, transparent, var(--gold), transparent);
+    animation: scrollPulse 2.5s ease infinite;
+  }
+  .scroll-label { font-size: 0.52rem; letter-spacing: 0.3em; color: var(--white-faint); text-transform: uppercase; }
+
+  /* ── SECTIONS ── */
+  section { padding: 140px 0; }
+  .container    { max-width: 1100px; margin: 0 auto; padding: 0 60px; }
+  .container-sm { max-width: 780px;  margin: 0 auto; padding: 0 60px; }
+
+  .reveal { opacity: 0; transform: translateY(36px); transition: opacity 1s cubic-bezier(0.16,1,0.3,1), transform 1s cubic-bezier(0.16,1,0.3,1); }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-delay-1 { transition-delay: 0.15s; }
+  .reveal-delay-2 { transition-delay: 0.3s; }
+  .reveal-delay-3 { transition-delay: 0.45s; }
+
+  .section-tag  { font-size: 0.58rem; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); margin-bottom: 24px; display: block; font-weight: 300; }
+  .section-line { width: 40px; height: 1px; background: var(--gold); opacity: 0.5; margin-bottom: 40px; }
+
+  /* ── DESIRE ── */
+  #desire { background: var(--black); }
+  .desire-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 100px; align-items: center; }
+  .desire-text h2 { font-family: var(--serif); font-size: clamp(2rem, 3.5vw, 3.2rem); font-weight: 300; line-height: 1.15; margin-bottom: 40px; color: var(--white); }
+  .desire-text h2 em { font-style: italic; color: var(--gold-light); }
+  .desire-text p { font-size: 0.88rem; line-height: 2; color: var(--white-dim); letter-spacing: 0.03em; margin-bottom: 28px; }
+  .desire-list { list-style: none; margin: 32px 0; }
+  .desire-list li {
+    font-family: var(--sans); font-size: 0.8rem; letter-spacing: 0.12em;
+    color: var(--white); padding: 14px 0; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 16px; text-transform: uppercase; font-weight: 200;
+  }
+  .desire-list li::before { content: ''; width: 4px; height: 4px; background: var(--gold); border-radius: 50%; flex-shrink: 0; }
+  .desire-visual { position: relative; height: 520px; }
+  .desire-visual-inner { position: absolute; inset: 0; border: 1px solid var(--border); overflow: hidden; }
+  .desire-visual-inner::before {
+    content: ''; position: absolute; inset: 0; z-index: 2;
+    background: linear-gradient(to bottom, rgba(8,8,8,0.2) 0%, rgba(8,8,8,0.55) 100%);
+  }
+  .desire-visual-img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transition: transform 0.8s cubic-bezier(0.16,1,0.3,1);
+  }
+  .desire-visual-inner:hover .desire-visual-img { transform: scale(1.04); }
+  .desire-tagline {
+    position: absolute; bottom: 40px; left: 40px; right: 40px; z-index: 3;
+    font-family: var(--serif); font-size: 1.4rem; font-weight: 300;
+    font-style: italic; color: rgba(245,242,237,0.75); line-height: 1.4;
+  }
+
+  /* ── IMPACT ── */
+  #impact { background: var(--deep); position: relative; overflow: hidden; }
+  #impact::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(to right, transparent, var(--gold), transparent); opacity: 0.3; }
+  #impact::after  { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: linear-gradient(to right, transparent, var(--gold), transparent); opacity: 0.3; }
+  .impact-header { text-align: center; margin-bottom: 90px; }
+  .impact-header h2 { font-family: var(--serif); font-size: clamp(1.8rem, 3vw, 2.8rem); font-weight: 300; color: var(--white); }
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); }
+  .stat-item { background: var(--deep); padding: 56px 40px; display: flex; flex-direction: column; gap: 12px; transition: background 0.3s; }
+  .stat-item:hover { background: rgba(184,150,90,0.03); }
+  .stat-number { font-family: var(--serif); font-size: clamp(2.5rem, 4vw, 3.8rem); font-weight: 300; color: var(--gold-light); line-height: 1; }
+  .stat-label  { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--white-dim); font-weight: 300; }
+  .impact-close { text-align: center; margin-top: 64px; font-family: var(--serif); font-size: 1.1rem; font-weight: 300; font-style: italic; color: var(--white-dim); }
+
+  /* ── EMOTIONAL ── */
+  #emotional { background: var(--black); }
+  .emotional-inner { text-align: center; max-width: 680px; margin: 0 auto; }
+  .emotional-symbol { width: 60px; height: 1px; background: var(--gold); opacity: 0.4; margin: 0 auto 56px; }
+  .emotional-inner h2 { font-family: var(--serif); font-size: clamp(2rem, 3.5vw, 3rem); font-weight: 300; margin-bottom: 40px; line-height: 1.2; }
+  .emotional-inner h2 em { font-style: italic; color: var(--gold-light); }
+  .emotional-inner p { font-size: 0.9rem; line-height: 1.95; color: var(--white-dim); margin-bottom: 44px; }
+  .senna-values { display: flex; justify-content: center; gap: 0; margin-top: 48px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .senna-value { padding: 28px 40px; border-right: 1px solid var(--border); font-size: 0.65rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold); font-weight: 300; }
+  .senna-value:last-child { border-right: none; }
+
+  /* ── INVESTMENT ── */
+  #investment { background: var(--surface); position: relative; }
+  .investment-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+  .investment-text h2 { font-family: var(--serif); font-size: clamp(1.8rem, 3vw, 2.8rem); font-weight: 300; margin-bottom: 36px; line-height: 1.2; }
+  .investment-text p  { font-size: 0.88rem; line-height: 2; color: var(--white-dim); }
+  .investment-items { margin-top: 64px; }
+  .inv-item { padding: 32px 0; border-bottom: 1px solid var(--border); display: flex; gap: 32px; align-items: flex-start; }
+  .inv-item:first-child { border-top: 1px solid var(--border); }
+  .inv-num { font-family: var(--serif); font-size: 2.5rem; font-weight: 300; color: rgba(184,150,90,0.2); line-height: 1; flex-shrink: 0; width: 60px; }
+  .inv-content h4 { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--white); margin-bottom: 10px; font-weight: 300; }
+  .inv-content p  { font-size: 0.83rem; color: var(--white-dim); line-height: 1.7; }
+
+  /* ── FILTER ── */
+  #filter { background: var(--deep); position: relative; overflow: hidden; text-align: center; padding: 160px 0; }
+  #filter::before { content: ''; position: absolute; top: 50%; left: 50%; width: 600px; height: 600px; background: radial-gradient(circle, rgba(184,150,90,0.05) 0%, transparent 70%); transform: translate(-50%, -50%); }
+  .filter-inner { position: relative; z-index: 2; }
+  .filter-inner h2 { font-family: var(--serif); font-size: clamp(2.2rem, 4vw, 3.8rem); font-weight: 300; margin-bottom: 20px; line-height: 1.15; }
+  .filter-inner h2 em { font-style: italic; color: var(--gold-light); }
+  .filter-inner > p { font-size: 0.88rem; color: var(--white-dim); margin-bottom: 64px; letter-spacing: 0.04em; line-height: 1.9; }
+  .filter-criteria { display: flex; flex-direction: column; gap: 0; max-width: 500px; margin: 0 auto 64px; border-top: 1px solid var(--border); }
+  .filter-criteria-item { padding: 22px 0; border-bottom: 1px solid var(--border); font-size: 0.78rem; letter-spacing: 0.12em; color: var(--white-dim); display: flex; align-items: center; gap: 20px; text-align: left; }
+  .filter-criteria-item::before { content: ''; width: 20px; height: 1px; background: var(--gold); flex-shrink: 0; }
+  .filter-divider  { width: 1px; height: 40px; background: linear-gradient(to bottom, transparent, var(--gold), transparent); margin: 0 auto 36px; opacity: 0.4; }
+  .filter-closing  { font-family: var(--serif); font-size: 1.1rem; font-weight: 300; font-style: italic; color: var(--white-dim); max-width: 500px; margin: 0 auto 48px; line-height: 1.7; }
+
+  /* ── PROCESS ── */
+  #process { background: var(--black); }
+  .process-header { margin-bottom: 72px; }
+  .process-header h2 { font-family: var(--serif); font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 300; }
+  .process-steps { display: grid; grid-template-columns: repeat(7, 1fr); position: relative; }
+  .process-steps::before { content: ''; position: absolute; top: 24px; left: 5%; right: 5%; height: 1px; background: linear-gradient(to right, transparent, rgba(184,150,90,0.2), transparent); }
+  .process-step { text-align: center; padding: 0 12px; }
+  .step-dot { width: 9px; height: 9px; border: 1px solid rgba(184,150,90,0.4); border-radius: 50%; margin: 20px auto 28px; position: relative; z-index: 2; background: var(--black); transition: background 0.3s, border-color 0.3s; }
+  .process-step:hover .step-dot { background: var(--gold); border-color: var(--gold); }
+  .step-label { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--white-dim); font-weight: 300; line-height: 1.5; }
+  .step-num   { font-family: var(--serif); font-size: 0.75rem; color: rgba(184,150,90,0.3); margin-bottom: 8px; }
+  .process-close { margin-top: 64px; padding-top: 40px; border-top: 1px solid var(--border); font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--white-faint); }
+
+  /* ── FINAL CTA ── */
+  #final-cta { background: var(--deep); text-align: center; padding: 180px 0; position: relative; overflow: hidden; }
+  #final-cta::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 50% 60% at 50% 100%, rgba(184,150,90,0.06) 0%, transparent 70%); }
+  .final-inner { position: relative; z-index: 2; }
+  .final-inner h2 { font-family: var(--serif); font-size: clamp(2rem, 3.5vw, 3.4rem); font-weight: 300; max-width: 640px; margin: 0 auto 48px; line-height: 1.25; }
+  .final-inner h2 em { font-style: italic; color: var(--gold-light); }
+  .final-inner p  { font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--white-faint); margin-top: 20px; }
+
+  /* ── FOOTER ── */
+  footer { background: var(--black); padding: 48px 60px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .footer-logo { font-family: var(--serif); font-size: 0.9rem; letter-spacing: 0.2em; opacity: 0.4; }
+  .footer-logo span { color: var(--gold); }
+  .footer-copy { font-size: 0.6rem; letter-spacing: 0.15em; color: rgba(245,242,237,0.2); text-transform: uppercase; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(5,5,5,0.92); backdrop-filter: blur(12px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+    padding: 20px;
+  }
+  .modal-overlay.active { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border);
+    max-width: 560px; width: 100%; max-height: 88vh;
+    overflow-y: auto; padding: 64px; position: relative;
+    transform: translateY(24px); transition: transform 0.5s cubic-bezier(0.16,1,0.3,1);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(184,150,90,0.3) transparent;
+    scroll-behavior: smooth;
+  }
+  .modal-overlay.active .modal { transform: translateY(0); }
+  .modal::-webkit-scrollbar { width: 3px; }
+  .modal::-webkit-scrollbar-track { background: transparent; }
+  .modal::-webkit-scrollbar-thumb { background: rgba(184,150,90,0.3); border-radius: 10px; }
+  .modal::-webkit-scrollbar-thumb:hover { background: rgba(184,150,90,0.6); }
+
+  .modal-close { position: absolute; top: 28px; right: 32px; font-size: 1.3rem; color: var(--white-dim); cursor: pointer; background: none; border: none; transition: color 0.2s; line-height: 1; font-family: var(--serif); }
+  .modal-close:hover { color: var(--white); }
+  .modal-eyebrow { font-size: 0.58rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); margin-bottom: 20px; display: block; }
+  .modal h3 { font-family: var(--serif); font-size: 1.8rem; font-weight: 300; margin-bottom: 10px; color: var(--white); }
+  .modal-sub { font-size: 0.78rem; color: var(--white-dim); margin-bottom: 48px; line-height: 1.7; letter-spacing: 0.03em; }
+  .form-group { margin-bottom: 36px; }
+  .form-group label { display: block; font-size: 0.62rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; font-weight: 300; }
+  .form-options { display: flex; flex-direction: column; gap: 2px; }
+  .form-option { display: flex; align-items: center; gap: 14px; padding: 12px 16px; cursor: pointer; border: 1px solid transparent; transition: border-color 0.2s, background 0.2s; }
+  .form-option:hover { border-color: var(--border); background: rgba(255,255,255,0.02); }
+  .form-option input[type="radio"] { appearance: none; width: 14px; height: 14px; border: 1px solid rgba(184,150,90,0.4); border-radius: 50%; flex-shrink: 0; position: relative; cursor: pointer; }
+  .form-option input[type="radio"]:checked { border-color: var(--gold); background: var(--gold); }
+  .form-option span { font-size: 0.78rem; color: var(--white-dim); letter-spacing: 0.05em; }
+  .form-divider { height: 1px; background: var(--border); margin: 40px 0; }
+  .form-field { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border); color: var(--white); font-family: var(--sans); font-size: 0.88rem; font-weight: 300; padding: 14px 0; margin-bottom: 28px; outline: none; letter-spacing: 0.04em; transition: border-color 0.3s; }
+  .form-field::placeholder { color: rgba(245,242,237,0.25); }
+  .form-field:focus { border-color: rgba(184,150,90,0.5); }
+
+  .btn-submit {
+    width: 100%; padding: 18px; background: transparent;
+    border: 1px solid rgba(184,150,90,0.5); color: var(--gold-light);
+    font-family: var(--sans); font-size: 0.65rem; font-weight: 300;
+    letter-spacing: 0.3em; text-transform: uppercase; cursor: pointer;
+    transition: background 0.3s, border-color 0.3s, color 0.3s, opacity 0.3s;
+    margin-top: 8px;
+  }
+  .btn-submit:hover:not(:disabled) { background: var(--gold-dim); border-color: var(--gold); color: var(--white); }
+  .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .form-legal { font-size: 0.6rem; color: rgba(245,242,237,0.2); text-align: center; margin-top: 20px; letter-spacing: 0.1em; line-height: 1.7; }
+  .modal-confirm { text-align: center; padding: 40px 0; display: none; }
+  .modal-confirm.active { display: block; }
+  .confirm-icon { width: 50px; height: 50px; border: 1px solid rgba(184,150,90,0.3); border-radius: 50%; margin: 0 auto 32px; display: flex; align-items: center; justify-content: center; color: var(--gold); font-size: 1.2rem; }
+  .modal-confirm h4 { font-family: var(--serif); font-size: 1.5rem; font-weight: 300; margin-bottom: 20px; }
+  .modal-confirm p  { font-size: 0.82rem; color: var(--white-dim); line-height: 1.8; }
+
+  /* ── WHATSAPP ── */
+  .whatsapp-btn { position: fixed; bottom: 36px; right: 36px; z-index: 500; width: 52px; height: 52px; border-radius: 50%; background: rgba(14,14,14,0.95); border: 1px solid rgba(184,150,90,0.3); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: border-color 0.3s, background 0.3s; text-decoration: none; }
+  .whatsapp-btn:hover { border-color: var(--gold); background: var(--gold-dim); }
+  .whatsapp-btn svg { width: 22px; height: 22px; fill: var(--gold); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes scrollPulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.7; } }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    nav { padding: 24px 28px; }
+    .container, .container-sm { padding: 0 28px; }
+    section { padding: 100px 0; }
+    .desire-grid { grid-template-columns: 1fr; gap: 60px; }
+    .desire-visual { height: 320px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .investment-grid { grid-template-columns: 1fr; gap: 60px; }
+    .process-steps { grid-template-columns: repeat(4, 1fr); row-gap: 40px; }
+    .process-steps::before { display: none; }
+    .senna-values { flex-wrap: wrap; }
+    .senna-value { padding: 20px 24px; }
+    footer { flex-direction: column; gap: 20px; text-align: center; }
+    .modal { padding: 40px 28px; }
+  }
+  @media (max-width: 600px) {
+    .stats-grid { grid-template-columns: 1fr; }
+    .process-steps { grid-template-columns: repeat(3, 1fr); }
+    .hero-lines::before, .hero-lines::after { display: none; }
+    .nav-cta { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Senna<span>.</span>Tower</div>
+  <button class="nav-cta" onclick="openModal()">Acesso Reservado</button>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <video class="hero-video" id="heroVideo" autoplay muted loop playsinline>
+    <source src="https://res.cloudinary.com/dvgnpwwrg/video/upload/v1775320301/85B86F16-31A2-4E2D-8172-FDB145555568_fzt0yc.mov" type="video/mp4">
+  </video>
+  <div class="hero-bg"></div>
+  <div class="hero-lines"></div>
+  <div class="hero-grain"></div>
+  <div class="hero-content" id="heroContent">
+    <p class="hero-eyebrow">São Paulo · Asset Global</p>
+    <h1 class="hero-h1">
+      Senna Tower não é sobre morar.<br>
+      É sobre onde você <em>se posiciona.</em>
+    </h1>
+    <p class="hero-sub">
+      Um ativo imobiliário global, reservado para quem já opera em outro nível de patrimônio, imagem e decisão.
+    </p>
+    <div class="hero-cta-wrap">
+      <button class="btn-primary" onclick="openModal()">Solicitar Acesso Reservado</button>
+      <span class="hero-micro">Acesso mediante análise de perfil</span>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    <span class="scroll-label">Descer</span>
+  </div>
+</section>
+
+<!-- DESIRE -->
+<section id="desire">
+  <div class="container">
+    <div class="desire-grid">
+      <div class="desire-text reveal">
+        <span class="section-tag">Escassez Real</span>
+        <div class="section-line"></div>
+        <h2>Isso não será<br><em>replicado</em></h2>
+        <p>O mercado pode repetir formatos. Mas não repete ativos dessa natureza.</p>
+        <ul class="desire-list">
+          <li>Escassez real de oferta</li>
+          <li>Relevância global</li>
+          <li>Força simbólica</li>
+          <li>Execução fora do padrão</li>
+        </ul>
+        <p style="margin-top: 12px;">Aqui, não se compra um imóvel.<br>Se ocupa um espaço que não volta ao mercado.</p>
+      </div>
+      <div class="desire-visual reveal reveal-delay-1">
+        <div class="desire-visual-inner">
+          <img
+            class="desire-visual-img"
+            src="https://res.cloudinary.com/dvgnpwwrg/image/upload/v1764203554/Captura_de_tela_2025-11-26_213041_dqo4gm.png"
+            alt="Senna Tower — São Paulo"
+          />
+          <p class="desire-tagline">"Um espaço que não volta ao mercado."</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- IMPACT -->
+<section id="impact">
+  <div class="container">
+    <div class="impact-header reveal">
+      <span class="section-tag">O Ativo</span>
+      <h2>Limitação real de oferta</h2>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-item reveal"><div class="stat-number">+500m</div><div class="stat-label">Altura total</div></div>
+      <div class="stat-item reveal reveal-delay-1"><div class="stat-number">157</div><div class="stat-label">Andares</div></div>
+      <div class="stat-item reveal reveal-delay-2"><div class="stat-number">228</div><div class="stat-label">Unidades exclusivas</div></div>
+      <div class="stat-item reveal"><div class="stat-number">∞</div><div class="stat-label">Vista permanente</div></div>
+      <div class="stat-item reveal reveal-delay-1"><div class="stat-number">01</div><div class="stat-label">Endereço. Irrepetível.</div></div>
+      <div class="stat-item reveal reveal-delay-2"><div class="stat-number">Sky</div><div class="stat-label">Mansões suspensas</div></div>
+    </div>
+    <p class="impact-close reveal">Uma estrutura que redefinirá o skyline. Para sempre.</p>
+  </div>
+</section>
+
+<!-- EMOTIONAL -->
+<section id="emotional">
+  <div class="container-sm">
+    <div class="emotional-inner reveal">
+      <div class="emotional-symbol"></div>
+      <span class="section-tag">Identidade</span>
+      <h2>Um ativo construído<br>sobre um <em>símbolo</em></h2>
+      <p>
+        Inspirado em Ayrton Senna, o projeto carrega em seu DNA o que poucos
+        ativos conseguem traduzir em concreto e aço.
+        Não é apenas sobre viver bem. É sobre o que isso representa.
+      </p>
+      <div class="senna-values">
+        <div class="senna-value">Excelência</div>
+        <div class="senna-value">Performance</div>
+        <div class="senna-value">Disciplina</div>
+        <div class="senna-value">Legado</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INVESTMENT -->
+<section id="investment">
+  <div class="container">
+    <div class="investment-grid">
+      <div class="investment-text reveal">
+        <span class="section-tag">Lógica de Valorização</span>
+        <div class="section-line"></div>
+        <h2>Outro tipo de<br>raciocínio patrimonial</h2>
+        <p>Ativos dessa categoria não seguem a lógica convencional de mercado. Eles operam em uma dimensão diferente de valor.</p>
+      </div>
+      <div class="investment-items reveal reveal-delay-1">
+        <div class="inv-item">
+          <div class="inv-num">01</div>
+          <div class="inv-content">
+            <h4>Escassez como fundamento</h4>
+            <p>Oferta irrepetível cria demanda permanente. O mercado não gera substitutos para este ativo.</p>
+          </div>
+        </div>
+        <div class="inv-item">
+          <div class="inv-num">02</div>
+          <div class="inv-content">
+            <h4>Marca como multiplicador</h4>
+            <p>O símbolo transcende o imóvel. Isso se traduz em liquidez seletiva e valorização por posicionamento.</p>
+          </div>
+        </div>
+        <div class="inv-item">
+          <div class="inv-num">03</div>
+          <div class="inv-content">
+            <h4>Perfil de comprador como proteção</h4>
+            <p>O curador do acesso define o ambiente. Isso preserva e amplifica o valor do conjunto.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FILTER -->
+<section id="filter">
+  <div class="container-sm">
+    <div class="filter-inner reveal">
+      <span class="section-tag">Acesso</span>
+      <h2>Não é para o mercado.<br>É para <em>um perfil.</em></h2>
+      <p>Este projeto é para quem já consolidou patrimônio, entende escassez<br>e decide com visão estratégica.</p>
+      <div class="filter-criteria">
+        <div class="filter-criteria-item">Já consolidou patrimônio significativo</div>
+        <div class="filter-criteria-item">Entende o que é escassez real de ativo</div>
+        <div class="filter-criteria-item">Decide com visão estratégica de longo prazo</div>
+        <div class="filter-criteria-item">Opera em outro nível de imagem e posicionamento</div>
+      </div>
+      <div class="filter-divider"></div>
+      <p class="filter-closing">Se busca preço, não é o caminho.<br>Se busca posicionamento, seguimos.</p>
+      <button class="btn-primary" onclick="openModal()">Solicitar Acesso ao Senna Tower</button>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section id="process">
+  <div class="container">
+    <div class="process-header reveal">
+      <span class="section-tag">Processo</span>
+      <h2>Acesso estruturado.<br>Sem abordagem comum.</h2>
+    </div>
+    <div class="process-steps reveal">
+      <div class="process-step"><div class="step-num">01</div><div class="step-dot"></div><div class="step-label">Solicitação</div></div>
+      <div class="process-step"><div class="step-num">02</div><div class="step-dot"></div><div class="step-label">Análise</div></div>
+      <div class="process-step"><div class="step-num">03</div><div class="step-dot"></div><div class="step-label">Contato</div></div>
+      <div class="process-step"><div class="step-num">04</div><div class="step-dot"></div><div class="step-label">Reunião</div></div>
+      <div class="process-step"><div class="step-num">05</div><div class="step-dot"></div><div class="step-label">Apresentação</div></div>
+      <div class="process-step"><div class="step-num">06</div><div class="step-dot"></div><div class="step-label">Aquisição</div></div>
+      <div class="process-step"><div class="step-num">07</div><div class="step-dot"></div><div class="step-label">Fechamento</div></div>
+    </div>
+    <p class="process-close reveal">Cada etapa é conduzida com a discrição que o ativo merece.</p>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section id="final-cta">
+  <div class="container-sm">
+    <div class="final-inner reveal">
+      <span class="section-tag">Próximo Passo</span>
+      <h2>Se isso conversa com o seu momento, o próximo passo é <em>reservado.</em></h2>
+      <button class="btn-primary" onclick="openModal()">Solicitar Acesso ao Senna Tower</button>
+      <p>Cada solicitação passa por análise de perfil</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Senna<span>.</span>Tower</div>
+  <div class="footer-copy">© 2025 · Acesso mediante análise · São Paulo</div>
+</footer>
+
+<!-- WHATSAPP -->
+<a class="whatsapp-btn" href="https://wa.me/?text=Ol%C3%A1%2C+gostaria+de+entender+melhor+o+acesso+ao+Senna+Tower." target="_blank" title="WhatsApp">
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+  </svg>
+</a>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div id="formContent">
+      <span class="modal-eyebrow">Senna Tower · Acesso Restrito</span>
+      <h3>Solicitação de acesso</h3>
+      <p class="modal-sub">Leva menos de 1 minuto. Exclusivo para perfis alinhados ao ativo.</p>
+
+      <div class="form-group">
+        <label>01 — Objetivo principal</label>
+        <div class="form-options">
+          <label class="form-option"><input type="radio" name="objetivo" value="Aquisição patrimonial"><span>Aquisição patrimonial</span></label>
+          <label class="form-option"><input type="radio" name="objetivo" value="Investimento"><span>Investimento</span></label>
+          <label class="form-option"><input type="radio" name="objetivo" value="Moradia"><span>Moradia</span></label>
+          <label class="form-option"><input type="radio" name="objetivo" value="Avaliando oportunidade"><span>Avaliando oportunidade</span></label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>02 — Faixa de investimento considerada</label>
+        <div class="form-options">
+          <label class="form-option"><input type="radio" name="faixa" value="R$ 30M a R$ 50M"><span>R$ 30M a R$ 50M</span></label>
+          <label class="form-option"><input type="radio" name="faixa" value="R$ 50M a R$ 80M"><span>R$ 50M a R$ 80M</span></label>
+          <label class="form-option"><input type="radio" name="faixa" value="Acima de R$ 80M"><span>Acima de R$ 80M</span></label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>03 — Momento de decisão</label>
+        <div class="form-options">
+          <label class="form-option"><input type="radio" name="momento" value="Pronto para avançar"><span>Pronto para avançar</span></label>
+          <label class="form-option"><input type="radio" name="momento" value="Comparando ativos"><span>Comparando ativos</span></label>
+          <label class="form-option"><input type="radio" name="momento" value="Estruturando entrada"><span>Estruturando entrada</span></label>
+          <label class="form-option"><input type="radio" name="momento" value="Explorando"><span>Explorando</span></label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>04 — Disponibilidade para conversa estratégica</label>
+        <div class="form-options">
+          <label class="form-option"><input type="radio" name="disponibilidade" value="Sim"><span>Sim</span></label>
+          <label class="form-option"><input type="radio" name="disponibilidade" value="Depende"><span>Depende</span></label>
+          <label class="form-option"><input type="radio" name="disponibilidade" value="Prefiro analisar antes"><span>Prefiro analisar antes</span></label>
+        </div>
+      </div>
+
+      <div class="form-divider"></div>
+
+      <input type="text"  class="form-field" placeholder="Nome completo" id="fieldNome">
+      <input type="tel"   class="form-field" placeholder="WhatsApp"      id="fieldWhatsapp">
+      <input type="email" class="form-field" placeholder="E-mail"         id="fieldEmail">
+
+      <button class="btn-submit" id="btnSubmit" onclick="submitForm()">Solicitar análise de perfil</button>
+      <p class="form-legal">Cada solicitação é analisada individualmente.<br>Não haverá contato sem alinhamento de perfil.</p>
+    </div>
+
+    <div class="modal-confirm" id="confirmContent">
+      <div class="confirm-icon">✓</div>
+      <h4>Solicitação recebida</h4>
+      <p>Caso o perfil esteja alinhado, você será contatado para uma análise estratégica e apresentação reservada.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ── CURSOR ── */
+  const cursor = document.getElementById('cursor');
+  const ring   = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+  });
+  (function animRing() {
+    rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+    ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+    requestAnimationFrame(animRing);
+  })();
+  document.querySelectorAll('button, a, .form-option, .stat-item').forEach(el => {
+    el.addEventListener('mouseenter', () => { ring.style.width = '50px'; ring.style.height = '50px'; ring.style.opacity = '0.6'; });
+    el.addEventListener('mouseleave', () => { ring.style.width = '32px'; ring.style.height = '32px'; ring.style.opacity = '1'; });
+  });
+
+  /* ── REVEAL ON SCROLL ── */
+  const revealObserver = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObserver.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+  /* ── MODAL ── */
+  function openModal() {
+    document.getElementById('modalOverlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('modalOverlay')) closeModal();
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  /* ── WEBHOOK ── */
+  const WEBHOOK_URL = 'https://webhook.wiseuptech.com.br/webhook/052524f2-c90c-49ea-b447-82b97c07af6e';
+
+  function getRadio(name) {
+    const el = document.querySelector('input[name="' + name + '"]:checked');
+    return el ? el.value : 'Não informado';
+  }
+
+  async function submitForm() {
+    const nome  = document.getElementById('fieldNome').value.trim();
+    const wpp   = document.getElementById('fieldWhatsapp').value.trim();
+    const email = document.getElementById('fieldEmail').value.trim();
+
+    /* validação */
+    let valid = true;
+    ['fieldNome', 'fieldWhatsapp', 'fieldEmail'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el.value.trim()) { el.style.borderColor = 'rgba(184,150,90,0.6)'; valid = false; }
+      else el.style.borderColor = '';
+    });
+    if (!valid) return;
+
+    /* lê as respostas do questionário */
+    const objetivo        = getRadio('objetivo');
+    const faixa           = getRadio('faixa');
+    const momento         = getRadio('momento');
+    const disponibilidade = getRadio('disponibilidade');
+
+    /* monta mensagem estruturada com os 4 itens */
+    const message = [
+      '[ Senna Tower · Landing Page ]',
+      '',
+      '01 - Objetivo principal: '                        + objetivo,
+      '02 - Faixa de investimento considerada: '         + faixa,
+      '03 - Momento de decisão: '                        + momento,
+      '04 - Disponibilidade para conversa estratégica: ' + disponibilidade,
+    ].join('\n');
+
+    /* payload no formato LeadPayload */
+    const payload = {
+      name: nome,
+      email: email,
+      phone: wpp,
+      message: message,
+      source: 'modal',
+      url: 'https://sennatower.helenoalvesbc.com.br',
+      createdAt: new Date().toISOString(),
+    };
+
+    /* feedback visual */
+    const btn = document.getElementById('btnSubmit');
+    btn.disabled    = true;
+    btn.textContent = 'Enviando...';
+
+    try {
+      const res = await fetch(WEBHOOK_URL, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error('status ' + res.status);
+    } catch (err) {
+      console.error('Webhook error:', err);
+      /* falha silenciosa: não expõe erro ao usuário */
+    } finally {
+      /* sempre exibe a tela de confirmação */
+      document.getElementById('formContent').style.display = 'none';
+      document.getElementById('confirmContent').classList.add('active');
+    }
+  }
+</script>
+
+<!-- GSAP parallax no hero -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script>
+  gsap.registerPlugin(ScrollTrigger);
+  gsap.to('#heroVideo', {
+    scale: 1.18, ease: 'none',
+    scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: 1 }
+  });
+  gsap.to('#heroContent', {
+    y: -100, opacity: 0, ease: 'none',
+    scrollTrigger: { trigger: '#hero', start: '20% top', end: 'bottom top', scrub: 1 }
+  });
+</script>
+</body>
+</html>
