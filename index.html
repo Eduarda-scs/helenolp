@@ -775,6 +775,8 @@
       /* sempre exibe a tela de confirmação */
       document.getElementById('formContent').style.display = 'none';
       document.getElementById('confirmContent').classList.add('active');
+      /* atualiza a URL sem recarregar a página */
+      window.history.pushState({}, '', '/contato-enviado');
     }
   }
 </script>
@@ -802,7 +804,7 @@ src="https://www.facebook.com/tr?id=1667707004361914&ev=PageView&noscript=1"
   height="0" width="0" style="display:none;visibility:hidden"></iframe>
 </noscript>
 <!-- End Google Tag Manager -->
- 
+
 <!-- GSAP parallax no hero -->
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
