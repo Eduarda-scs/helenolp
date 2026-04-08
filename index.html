@@ -278,13 +278,34 @@
   .process-close { margin-top: 64px; padding-top: 40px; border-top: 1px solid var(--border); font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--white-faint); }
 
   /* ── FINAL CTA ── */
-  #final-cta { background: var(--deep); text-align: center; padding: 180px 0; position: relative; overflow: hidden; }
-  #final-cta::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 50% 60% at 50% 100%, rgba(184,150,90,0.06) 0%, transparent 70%); }
-  .final-inner { position: relative; z-index: 2; }
-  .final-inner h2 { font-family: var(--serif); font-size: clamp(2rem, 3.5vw, 3.4rem); font-weight: 300; max-width: 640px; margin: 0 auto 48px; line-height: 1.25; }
-  .final-inner h2 em { font-style: italic; color: var(--gold-light); }
-  .final-inner p  { font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--white-faint); margin-top: 20px; }
+#final-cta { 
+  /* Substitua a URL abaixo pela sua URL pública */
+  background-image: linear-gradient(to bottom, rgba(10, 10, 10, 0.8), rgba(10, 10, 10, 0.3)), url('SUA_URL_PUBLICA_AQUI');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed; /* Opcional: cria um efeito parallax elegante */
+  
+  text-align: center; 
+  padding: 180px 0; 
+  position: relative; 
+  overflow: hidden; 
+}
 
+#final-cta::before { 
+  content: ''; 
+  position: absolute; 
+  inset: 0; 
+  /* Mantive seu gradiente, ele vai agir como um brilho sobre a foto */
+  background: radial-gradient(ellipse 50% 60% at 50% 100%, rgba(184,150,90,0.15) 0%, transparent 70%); 
+  z-index: 1;
+}
+
+.final-inner { 
+  position: relative; 
+  z-index: 2; 
+}
+
+/* O restante do seu código (h2, em, p) continua igual */
   /* ── FOOTER ── */
   footer { background: var(--black); padding: 48px 60px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
   .footer-logo { font-family: var(--serif); font-size: 0.9rem; letter-spacing: 0.2em; opacity: 0.4; }
@@ -328,7 +349,7 @@
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0;
-    height: 20%;
+    height: 10%;
     background: linear-gradient(to bottom, var(--black), transparent);
     z-index: 2;
     pointer-events: none;
@@ -337,7 +358,7 @@
     content: '';
     position: absolute;
     bottom: 0; left: 0; right: 0;
-    height: 20%;
+    height: 10%;
     background: linear-gradient(to top, var(--black), transparent);
     z-index: 2;
     pointer-events: none;
